@@ -2,7 +2,7 @@
 /*
 Plugin Name: MightyImage
 Description: A WordPress plugin to automatically fetch your WordPress images via <a href="https://www.mightyimage.io" target="_blank">MightyImage</a> for optimization and fast delivery. <a href="https://mightyimage.io/blog" target="_blank">Learn more</a> from documentation.
-Author: MightImage
+Author: Jimmy - MightyImage
 Author URI: https://mightyimage.io
 Version: 1.0.0
 */

@@ -28,26 +28,6 @@ function check_file_extension($filename) {
 function mightyimage_render_mightyimage_setting_page() {
   global $mightyimage_options;
 
-  $plugin = "wp-lazy-loading";
-
-  $api = plugins_api('plugin_information', array(
-    'slug' => $plugin,
-    'fields' => array(
-      'short_description' => true,
-      'sections' => false,
-      'requires' => false,
-      'downloaded' => true,
-      'last_updated' => false,
-      'added' => false,
-      'tags' => false,
-      'compatibility' => false,
-      'homepage' => false,
-      'donate_link' => false,
-      'icons' => true,
-      'banners' => true,
-    ) ,
-  ));
-
   $mightyimage_options["cname"] = !empty($mightyimage_options["cname"]) ? $mightyimage_options["cname"] : "";
   $mightyimage_options["file_type"] = !empty($mightyimage_options["file_type"]) ? $mightyimage_options["file_type"] : "*.gif;*.png;*.jpg;*.jpeg;*.bmp;*.ico;*.webp";
   $mightyimage_options["custom_files"] = !empty($mightyimage_options["custom_files"]) ? $mightyimage_options["custom_files"] : "favicon.ico\ncustom-directory";
@@ -67,7 +47,7 @@ function mightyimage_render_mightyimage_setting_page() {
 
   ob_start();
 
-  wp_enqueue_style('xyz', plugins_url('mightyimage') . '/lib/main.css');
+  wp_enqueue_style('mightyimage', plugins_url('mightyimage') . '/lib/main.css');
 ?>
 <div>
    <div id="mi-plugin-container">
