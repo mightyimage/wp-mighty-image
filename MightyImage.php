@@ -4,7 +4,8 @@ Plugin Name: MightyImage
 Description: A WordPress plugin to automatically fetch your WordPress images via <a href="https://www.mightyimage.io" target="_blank">MightyImage</a> for optimization and fast delivery. <a href="https://mightyimage.io/blog" target="_blank">Learn more</a> from documentation.
 Author: Jimmy - MightyImage
 Author URI: https://mightyimage.io
-Version: 1.0.0
+Version: 1.1.0
+Text Domain: mightyimage_domain
 */
 
 // Variables
@@ -14,18 +15,22 @@ if (!defined('ABSPATH')) {
   exit;
 }
 
-if (!defined('MI_PLUGIN_PATH')) {
-    define('MI_PLUGIN_PATH', __DIR__);
+if (!defined('MightyImage_PluginPath')) {
+    define('MightyImage_PluginPath', __DIR__);
 }
 
-if (!defined('MI_PLUGIN_ENTRYPOINT')) {
-    define('MI_PLUGIN_ENTRYPOINT', __FILE__);
+if (!defined('MightyImage_PluginEntrypoint')) {
+    define('MightyImage_PluginEntrypoint', __FILE__);
 }
   
-if (!defined(('MI_DEBUG'))) {
-    define('MI_DEBUG', false);
+if (!defined(('MightyImage_Debug'))) {
+    define('MightyImage_Debug', false);
 }
 
+if (!defined(('MightyImage_Validation_Url'))) {
+  define('MightyImage_Validation_Url', "https://europe-west1-mightyimage-52e65.cloudfunctions.net/account");
+  //define('MightyImage_Validation_Url', "https://api.mightyimage.io/v1/account");
+}
 
 add_action('template_redirect', function () {
 
@@ -39,6 +44,11 @@ add_action('template_redirect', function () {
       $mightyimageUrlEndpoint = $mightyimage_options['mightyimage_url_endpoint'];
     }
   
+    //Do not activate CDN, it is not enabled
+    if (!isset($mightyimage_options['enabled'])) {
+      return;
+    }
+
     if (empty($mightyimageId) && empty($mightyimageUrlEndpoint)) {
       return;
     }
@@ -49,18 +59,14 @@ add_action('template_redirect', function () {
   
     // get url of cdn & site
     if (!empty($mightyimageId)) {
-      $cdn_url = "https://mightyimage.io/" . $mightyimageId;
-    }
-  
-    if (!empty($mightyimage_options["cname"])) {
-      $cdn_url = $mightyimage_options["cname"];
+      $cdn_url = "https://media.mightyimage.io/image/" . $mightyimageId;
     }
   
     if (!empty($mightyimageUrlEndpoint)) {
       $cdn_url = $mightyimageUrlEndpoint;
     }
   
-    $cdn_url = ensure_valid_url($cdn_url);
+    $cdn_url = MightyImageHelper::EnsureValidUrl($cdn_url);
     if (empty($cdn_url)) {
       return;
     }
@@ -75,40 +81,4 @@ add_action('template_redirect', function () {
 });
 
 include ('lib/setting.php');
-
-// Settings
-function mightyimage_plugin_admin_links($links, $file) {
-    static $mi_plugin;
-    if (!$mi_plugin) {
-      $mi_plugin = plugin_basename(__FILE__);
-    }
-    if ($file == $my_plugin) {
-      $settings_link = '<a href="options-general.php?page=mightyimage-setting">Settings</a>';
-      array_unshift($links, $settings_link);
-    }
-    return $links;
-}
-
-function ensure_valid_url($url) {
-
-    $parsed_url = parse_url($url);
-  
-    $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '//';
-    $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
-    $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
-    $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
-    $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
-    $pass = ($user || $pass) ? "$pass@" : '';
-    $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
-    $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
-    $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
-  
-    $result = "$scheme$user$pass$host$port$path$query$fragment";
-  
-    if ($result) return substr($result, -1) == "/" ? $result : $result . '/';
-  
-    return NULL;
-  }
-  
-  add_filter('plugin_action_links', 'mightyimage_plugin_admin_links', 10, 2);
-  ?>
+?>

@@ -343,9 +343,6 @@ class MightyImageHelper {
   }
 
   static public function cache_blog_minify_dir() {
-    // when minify manual used with a shared config - shared
-    // minify urls has to be used too, since CDN upload is possible
-    // only from network admin
     if (MightyImageHelper::is_wpmu() && MightyImageHelper::is_using_master_config() && !Dispatcher::config()->get_boolean('minify.auto')) $path = MightyImageHelper::cache_blog_dir('minify', 0);
     else $path = MightyImageHelper::cache_blog_dir('minify');
 
@@ -541,7 +538,6 @@ class MightyImageHelper {
     if ($parse_url && isset($parse_url['host'])) {
       return $parse_url['host'];
     }
-
     return MightyImageHelper::host();
   }
 
@@ -593,7 +589,7 @@ class MightyImageHelper {
       }
     }
 
-    return $host;
+    return esc_html($host);
   }
 
   static public function host() {
@@ -603,26 +599,6 @@ class MightyImageHelper {
     if ($pos === false) return $host_port;
 
     return substr($host_port, 0, $pos);
-  }
-
-  /**
-   * Returns WP config file path
-   *
-   * @return string
-   */
-  static public function wp_config_path() {
-    $search = array(
-      ABSPATH . 'wp-config.php',
-      dirname(ABSPATH) . DIRECTORY_SEPARATOR . 'wp-config.php'
-    );
-
-    foreach ($search as $path) {
-      if (file_exists($path)) {
-        return $path;
-      }
-    }
-
-    return false;
   }
 
   /**
@@ -1494,14 +1470,33 @@ class MightyImageHelper {
     }
 
     static function log_debug($event, $content) {
-      if (defined('MI_DEBUG') && MI_DEBUG == true) {
+      if (defined('MightyImage_Debug') && MightyImage_Debug == true) {
 
         if (!array_key_exists($event, MightyImageHelper::$debug_logs)) {
           MightyImageHelper::$debug_logs[$event] = array();
         }
 
         array_push(MightyImageHelper::$debug_logs[$event], $content);
+
+        MightyImageHelper::write_debug_logs();
       }
+    }
+
+    static function write_debug_logs($mode = 'a', $file = 'mightyImage_debug' ) {
+        $upload_dir = MightyImageHelper::wp_upload_dir();
+        $upload_dir = $upload_dir['basedir'];
+        $entry = "";
+        try{
+          if ( is_array(MightyImageHelper::$debug_logs ) ) { 
+            $entry = json_encode(MightyImageHelper::$debug_logs); 
+          } 
+          $file  = $upload_dir . '/' . $file . '.log';
+          $file  = fopen( $file, $mode );
+          $bytes = fwrite( $file, current_time('mysql') . "::" . $entry . "\n" ); 
+          fclose( $file );
+        }catch(\Exception $ex){
+          error_log( $ex->getMessage(), 0 );
+        }
     }
 
     static function print_debug_logs($buffer) {
@@ -1509,5 +1504,26 @@ class MightyImageHelper {
       $buffer = $buffer . print_r(MightyImageHelper::$debug_logs, true);
       $buffer = $buffer . "-->";
       return $buffer;
+    }
+
+    static function ensureValidUrl($url) {
+
+      $parsed_url = parse_url($url);
+    
+      $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '//';
+      $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+      $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+      $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
+      $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
+      $pass = ($user || $pass) ? "$pass@" : '';
+      $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+      $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+      $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
+    
+      $result = "$scheme$user$pass$host$port$path$query$fragment";
+    
+      if ($result) return substr($result, -1) == "/" ? $result : $result . '/';
+    
+      return NULL;
     }
   }

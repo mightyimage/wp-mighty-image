@@ -216,6 +216,18 @@ a.dops-card:focus {
 	box-shadow: none
 }
 
+.dops-text-input.dops-text-input.valid {
+    border-color: #86fc6c;
+    outline: 0;
+    box-shadow: 0 0 6px 1px #86fc6c;
+}
+
+.dops-text-input.dops-text-input.invalid {
+    border-color: #ff0000;
+    outline: 0;
+    box-shadow: 0 0 6px 1px #ff0000;
+}
+
 .dops-text-input.dops-text-input:-ms-input-placeholder {
 	color: #a2a2a2
 }

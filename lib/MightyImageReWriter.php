@@ -4,7 +4,6 @@ class MightyImageReWriter {
    * @var string
    */
   private $cdn_url = '';
-
   private $_regexps = array();
   private $_placeholders = array();
   private $mightyimage_options;
@@ -26,15 +25,18 @@ class MightyImageReWriter {
     $this->cdn_url = $cdn_url;
 
     // default values for all options
-    $mightyimage_options["file_type"] = !empty($mightyimage_options["file_type"]) ? $mightyimage_options["file_type"] : "*.gif;*.png;*.jpg;*.jpeg;*.bmp;*.ico;*.webp";
-    $mightyimage_options["custom_files"] = !empty($mightyimage_options["custom_files"]) ? $mightyimage_options["custom_files"] : "favicon.ico\n";
-    $mightyimage_options["reject_files"] = !empty($mightyimage_options["reject_files"]) ? $mightyimage_options["reject_files"] : "wp-content/uploads/wpcf7_captcha/*\nwp-content/uploads/imagerotator.swf\n";
+    $mightyimage_options["file_type"]    = !empty($mightyimage_options["file_type"])     ? $mightyimage_options["file_type"] : "*.gif;*.png;*.jpg;*.jpeg;*.bmp;*.ico;*.webp";
+    $mightyimage_options["custom_files"] = !empty($mightyimage_options["custom_files"])  ? $mightyimage_options["custom_files"] : "favicon.ico\n";
+    $mightyimage_options["reject_files"] = !empty($mightyimage_options["reject_files"])  ? $mightyimage_options["reject_files"] : "wp-content/uploads/wpcf7_captcha/*\nwp-content/uploads/imagerotator.swf\n";
+    $mightyimage_options["webp"]         = (bool)(MightyImageHelper::to_boolean($mightyimage_options["webp"])) ? true : false;
+    $mightyimage_options["enabled"]      = (bool)(MightyImageHelper::to_boolean($mightyimage_options["enabled"])) ? true : false;
 
     $this->mightyimage_options = $mightyimage_options;
+
     MightyImageHelper::log_debug("Rewriter Options", array(
       "site_url" => $site_url,
-      "cdn_url" => $cdn_url,
-      "options" => $mightyimage_options
+      "cdn_url"  => $cdn_url,
+      "options"  => $mightyimage_options
     ));
   }
 
@@ -54,7 +56,6 @@ class MightyImageReWriter {
         }
       }
     }
-
     return false;
   }
 
@@ -65,46 +66,35 @@ class MightyImageReWriter {
     if ($this->dirs == '' || count($input) < 1) {
       return 'wp\-content|wp\-includes';
     }
-
     return implode('|', array_map('quotemeta', array_map('trim', $input)));
   }
 
+  //todo next feature is allow custom params to mightyimage to size and optimize image
   protected function extract_img_details($content) {
     preg_match_all('/(.*)-([0-9]+)x([0-9]+)\.([^"\']+)/', $content, $matches);
-
     $lookup = array(
-      "raw",
-      "urlWithoutHostAndParam",
       'w',
       'h',
-      'type'
+      'ct',
+      'cl',
+      'bf',
+      'g',
+      'gs',
+      'sp',
+      'f',
+      'q',
+      'p'
     );
     $data = array();
     foreach ($matches as $k => $v) {
       foreach ($v as $ind => $val) {
-        // 				echo '<h1>'.$val.'</h1>';
         if (!array_key_exists($ind, $data)) {
           $data[$ind] = array();
         }
-
         $key = $lookup[$k];
-        if ($key === 'type') {
-          if (strpos($val, '?') !== false) {
-            $parts = explode('?', $val);
-            $data[$ind]['type'] = $parts[0];
-            $data[$ind]['extra'] = $parts[1];
-          }
-          else {
-            $data[$ind]['type'] = $val;
-            $data[$ind]['extra'] = '';
-          }
-        }
-        else {
-          $data[$ind][$key] = $val;
-        }
+        $data[$ind][$key] = $val;
       }
     }
-
     return $data;
   }
 
@@ -116,32 +106,17 @@ class MightyImageReWriter {
       MightyImageHelper::log_debug("Exluded Rewriting", $path);
       return $quote . $url;
     }
+
     $site_url = $this->site_url;
-    $final_url = "";
+    $extra = "";
 
-    if (false) {
-      $transformation = array();
-      if ($img['w']) array_push($transformation, 'w-' . $img['w']);
-      if ($img['h']) array_push($transformation, 'h-' . $img['h']);
-      $transformationExist = strpos($img['urlWithoutHostAndParam'], 'tr');
-
-      if ($transformationExist === false) {
-        $transformationString = "tr:" . implode(',', $transformation) . "/";
-      }
-      else {
-        $transformationString = "";
-      }
-
-      $to_replace = $img['raw'];
-      $extra_params = $img['extra'] ? '&amp;' . $img['extra'] : '';
-      $final_url = $this->cdn_url . $transformationString . $img['urlWithoutHostAndParam'] . '.' . $img['type'] . $extra_params;
+    if($this->mightyimage_options["webp"] == true){
+      $extra = "?f=webp";
     }
-    else {
-      $final_url = $this->cdn_url . $path;
-    }
+
+    $final_url = $this->cdn_url . $path . $extra;
 
     MightyImageHelper::log_debug("Rewriting", $path . " => " . $final_url);
-
     return $quote . $final_url;
   }
 
@@ -164,11 +139,6 @@ class MightyImageReWriter {
     }
 
     $buffer = $this->replace_placeholders($buffer);
-
-    if (defined('MI_DEBUG') && MI_DEBUG == true) {
-      $buffer = MightyImageHelper::print_debug_logs($buffer);
-    }
-
     return $buffer;
   }
 
@@ -181,6 +151,7 @@ class MightyImageReWriter {
 
   function _srcset_replace_callback($matches) {
     list($match, $srcset) = $matches;
+
     if (empty($this->_regexps)) return $match;
     $index = "%srcset-" . count($this->_placeholders) . "%";
 
@@ -211,6 +182,7 @@ class MightyImageReWriter {
 
     }
     $this->_placeholders[$index] = implode(',', $new_srcset_urls);
+
     return 'srcset="' . $index . '"';
   }
 
