@@ -1,5 +1,6 @@
 <?php
-class MightyImageHelper {
+class MightyImageHelper
+{
   static $debug_logs = array();
 
   /**
@@ -11,7 +12,8 @@ class MightyImageHelper {
    * @param string  $separator
    * @return string
    */
-  static public function url_format($url = '', $params = array() , $skip_empty = false, $separator = '&') {
+  static public function url_format($url = '', $params = array(), $skip_empty = false, $separator = '&')
+  {
     if ($url != '') {
       $parse_url = @parse_url($url);
       $url = '';
@@ -32,7 +34,7 @@ class MightyImageHelper {
         }
 
         if (!empty($parse_url['port']) && $parse_url['port'] != 80) {
-          $url .= ':' . (int)$parse_url['port'];
+          $url .= ':' . (int) $parse_url['port'];
         }
       }
 
@@ -56,8 +58,7 @@ class MightyImageHelper {
       if (!empty($parse_url['fragment'])) {
         $url .= '#' . $parse_url['fragment'];
       }
-    }
-    else {
+    } else {
       $query = MightyImageHelper::url_query($params, $skip_empty, $separator);
 
       if ($query != '') {
@@ -76,11 +77,12 @@ class MightyImageHelper {
    * @param string  $separator
    * @return string
    */
-  static public function url_query($params = array() , $skip_empty = false, $separator = '&') {
+  static public function url_query($params = array(), $skip_empty = false, $separator = '&')
+  {
     $str = '';
     static $stack = array();
 
-    foreach ((array)$params as $key => $value) {
+    foreach ((array) $params as $key => $value) {
       if ($skip_empty === true && empty($value)) {
         continue;
       }
@@ -91,8 +93,7 @@ class MightyImageHelper {
         if (count($value)) {
           $str .= ($str != '' ? '&' : '') . MightyImageHelper::url_query($value, $skip_empty, $key);
         }
-      }
-      else {
+      } else {
         $name = '';
         foreach ($stack as $key) {
           $name .= ($name != '' ? '[' . $key . ']' : $key);
@@ -110,14 +111,17 @@ class MightyImageHelper {
    * Returns URL from filename/dirname
    *
    * @return string
-  */
-  static public function filename_to_url($filename, $use_site_url = false) {
+   */
+  static public function filename_to_url($filename, $use_site_url = false)
+  {
     // using wp-content instead of document_root as known dir since dirbased
     // multisite wp adds blogname to the path inside site_url
-    if (substr($filename, 0, strlen(WP_CONTENT_DIR)) != WP_CONTENT_DIR) return '';
+    if (substr($filename, 0, strlen(WP_CONTENT_DIR)) != WP_CONTENT_DIR)
+      return '';
     $uri_from_wp_content = substr($filename, strlen(WP_CONTENT_DIR));
 
-    if (DIRECTORY_SEPARATOR != '/') $uri_from_wp_content = str_replace(DIRECTORY_SEPARATOR, '/', $uri_from_wp_content);
+    if (DIRECTORY_SEPARATOR != '/')
+      $uri_from_wp_content = str_replace(DIRECTORY_SEPARATOR, '/', $uri_from_wp_content);
 
     $url = content_url($uri_from_wp_content);
     $url = apply_filters('w3tc_filename_to_url', $url);
@@ -130,7 +134,8 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_dbcluster() {
+  static public function is_dbcluster()
+  {
     return defined('W3TC_FILE_DB_CLUSTER_CONFIG') && @file_exists(W3TC_FILE_DB_CLUSTER_CONFIG) && defined('W3TC_ENTERPRISE') && W3TC_ENTERPRISE;
   }
 
@@ -139,7 +144,8 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_wpmu_subdomain() {
+  static public function is_wpmu_subdomain()
+  {
     return ((defined('SUBDOMAIN_INSTALL') && SUBDOMAIN_INSTALL) || (defined('VHOST') && VHOST == 'yes'));
   }
 
@@ -148,7 +154,8 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_wpmu() {
+  static public function is_wpmu()
+  {
     static $wpmu = null;
 
     if ($wpmu === null) {
@@ -158,18 +165,18 @@ class MightyImageHelper {
     return $wpmu;
   }
 
-  static public function is_using_master_config() {
+  static public function is_using_master_config()
+  {
     static $result = null;
     if (is_null($result)) {
       if (!MightyImageHelper::is_wpmu()) {
         $result = true;
-      }
-      elseif (is_network_admin()) {
+      } elseif (is_network_admin()) {
         $result = true;
-      }
-      else {
+      } else {
         $blog_data = Util_WpmuBlogmap::get_current_blog_data();
-        if (is_null($blog_data)) $result = true;
+        if (is_null($blog_data))
+          $result = true;
         $result = ($blog_data[0] == 'm');
       }
     }
@@ -183,7 +190,8 @@ class MightyImageHelper {
    * @param string  $url
    * @return boolean
    */
-  static public function is_url($url) {
+  static public function is_url($url)
+  {
     return preg_match('~^(https?:)?//~', $url);
   }
 
@@ -192,10 +200,11 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_https() {
+  static public function is_https()
+  {
     switch (true) {
       case (isset($_SERVER['HTTPS']) && MightyImageHelper::to_boolean($_SERVER['HTTPS'])):
-      case (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] == 443):
+      case (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] == 443):
       case (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'):
         return true;
     }
@@ -206,9 +215,12 @@ class MightyImageHelper {
   /**
    * Moves user to preview-mode or opposite
    */
-  static public function set_preview($is_enabled) {
-    if ($is_enabled) setcookie('w3tc_preview', '*', 0, '/');
-    else setcookie("w3tc_preview", '', time() - 3600, '/');
+  static public function set_preview($is_enabled)
+  {
+    if ($is_enabled)
+      setcookie('w3tc_preview', '*', 0, '/');
+    else
+      setcookie("w3tc_preview", '', time() - 3600, '/');
   }
 
   /**
@@ -216,7 +228,8 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_preview_mode() {
+  static public function is_preview_mode()
+  {
     return !empty($_COOKIE['w3tc_preview']);
   }
 
@@ -225,9 +238,11 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_apache() {
+  static public function is_apache()
+  {
     // assume apache when unknown, since most common
-    if (empty($_SERVER['SERVER_SOFTWARE'])) return true;
+    if (empty($_SERVER['SERVER_SOFTWARE']))
+      return true;
 
     return isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'Apache') !== false;
   }
@@ -237,7 +252,8 @@ class MightyImageHelper {
    *
    * @return bool
    */
-  static public function is_litespeed() {
+  static public function is_litespeed()
+  {
     return isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'LiteSpeed') !== false;
   }
 
@@ -246,7 +262,8 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_nginx() {
+  static public function is_nginx()
+  {
     return isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false;
   }
 
@@ -255,7 +272,8 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_iis() {
+  static public function is_iis()
+  {
     return isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'IIS') !== false;
   }
 
@@ -265,9 +283,11 @@ class MightyImageHelper {
    * @param string  $host
    * @return string
    */
-  static public function url_to_host($url) {
+  static public function url_to_host($url)
+  {
     $a = parse_url($url);
-    if (isset($a['host'])) return $a['host'];
+    if (isset($a['host']))
+      return $a['host'];
 
     return '';
   }
@@ -275,11 +295,13 @@ class MightyImageHelper {
   /**
    * Returns path from URL. Without trailing slash
    */
-  static public function url_to_uri($url) {
+  static public function url_to_uri($url)
+  {
     $uri = @parse_url($url, PHP_URL_PATH);
 
     // convert FALSE and other return values to string
-    if (empty($uri)) return '';
+    if (empty($uri))
+      return '';
 
     return rtrim($uri, '/');
   }
@@ -289,10 +311,12 @@ class MightyImageHelper {
    *
    * @return integer
    */
-  static public function blog_id() {
+  static public function blog_id()
+  {
     global $w3_current_blog_id;
 
-    if (!is_null($w3_current_blog_id)) return $w3_current_blog_id;
+    if (!is_null($w3_current_blog_id))
+      return $w3_current_blog_id;
 
     if (!MightyImageHelper::is_wpmu() || is_network_admin()) {
       $w3_current_blog_id = 0;
@@ -300,13 +324,16 @@ class MightyImageHelper {
     }
 
     $blog_data = Util_WpmuBlogmap::get_current_blog_data();
-    if (!is_null($blog_data)) $w3_current_blog_id = substr($blog_data, 1);
-    else $w3_current_blog_id = 0;
+    if (!is_null($blog_data))
+      $w3_current_blog_id = substr($blog_data, 1);
+    else
+      $w3_current_blog_id = 0;
 
     return $w3_current_blog_id;
   }
 
-  static public function wp_upload_dir() {
+  static public function wp_upload_dir()
+  {
     return wp_upload_dir();
   }
 
@@ -316,7 +343,8 @@ class MightyImageHelper {
    * @param string  $section
    * @return string
    */
-  static public function cache_dir($section) {
+  static public function cache_dir($section)
+  {
     return W3TC_CACHE_DIR . DIRECTORY_SEPARATOR . $section;
   }
 
@@ -327,24 +355,31 @@ class MightyImageHelper {
    * @param null|int $blog_id
    * @return string
    */
-  static public function cache_blog_dir($section, $blog_id = null) {
-    if (!MightyImageHelper::is_wpmu()) $postfix = '';
+  static public function cache_blog_dir($section, $blog_id = null)
+  {
+    if (!MightyImageHelper::is_wpmu())
+      $postfix = '';
     else {
-      if (is_null($blog_id)) $blog_id = MightyImageHelper::blog_id();
+      if (is_null($blog_id))
+        $blog_id = MightyImageHelper::blog_id();
 
       $postfix = DIRECTORY_SEPARATOR . sprintf('%d', $blog_id);
 
       if (defined('W3TC_BLOG_LEVELS')) {
-        for ($n = 0;$n < W3TC_BLOG_LEVELS;$n++) $postfix = DIRECTORY_SEPARATOR . substr($postfix, strlen($postfix) - 1 - $n, 1) . $postfix;
+        for ($n = 0; $n < W3TC_BLOG_LEVELS; $n++)
+          $postfix = DIRECTORY_SEPARATOR . substr($postfix, strlen($postfix) - 1 - $n, 1) . $postfix;
       }
     }
 
     return MightyImageHelper::cache_dir($section) . $postfix;
   }
 
-  static public function cache_blog_minify_dir() {
-    if (MightyImageHelper::is_wpmu() && MightyImageHelper::is_using_master_config() && !Dispatcher::config()->get_boolean('minify.auto')) $path = MightyImageHelper::cache_blog_dir('minify', 0);
-    else $path = MightyImageHelper::cache_blog_dir('minify');
+  static public function cache_blog_minify_dir()
+  {
+    if (MightyImageHelper::is_wpmu() && MightyImageHelper::is_using_master_config() && !Dispatcher::config()->get_boolean('minify.auto'))
+      $path = MightyImageHelper::cache_blog_dir('minify', 0);
+    else
+      $path = MightyImageHelper::cache_blog_dir('minify');
 
     return $path;
   }
@@ -355,7 +390,8 @@ class MightyImageHelper {
    * @param string  $url
    * @return string
    */
-  static public function get_url_regexp($url) {
+  static public function get_url_regexp($url)
+  {
     $url = preg_replace('~(https?:)?//~i', '', $url);
     $url = preg_replace('~^www\.~i', '', $url);
 
@@ -370,7 +406,8 @@ class MightyImageHelper {
    * @param string  $url
    * @return string
    */
-  static public function url_to_maybe_https($url) {
+  static public function url_to_maybe_https($url)
+  {
     if (MightyImageHelper::is_https()) {
       $url = str_replace('http://', 'https://', $url);
     }
@@ -384,14 +421,15 @@ class MightyImageHelper {
    * @return string
    */
 
-  static public function home_domain_root_url() {
+  static public function home_domain_root_url()
+  {
     $home_url = get_home_url();
     $parse_url = @parse_url($home_url);
 
     if ($parse_url && isset($parse_url['scheme']) && isset($parse_url['host'])) {
       $scheme = $parse_url['scheme'];
       $host = $parse_url['host'];
-      $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . (int)$parse_url['port'] : '');
+      $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . (int) $parse_url['port'] : '');
       $domain_url = sprintf('%s://%s%s', $scheme, $host, $port);
 
       return $domain_url;
@@ -405,7 +443,8 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function home_domain_root_url_regexp() {
+  static public function home_domain_root_url_regexp()
+  {
     $domain_url = MightyImageHelper::home_domain_root_url();
     $regexp = MightyImageHelper::get_url_regexp($domain_url);
 
@@ -417,7 +456,8 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function home_url_maybe_https() {
+  static public function home_url_maybe_https()
+  {
     $home_url = get_home_url();
     $ssl = MightyImageHelper::url_to_maybe_https($home_url);
 
@@ -429,7 +469,8 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function home_url_regexp() {
+  static public function home_url_regexp()
+  {
     $home_url = get_home_url();
     $regexp = MightyImageHelper::get_url_regexp($home_url);
 
@@ -439,14 +480,15 @@ class MightyImageHelper {
   /**
    * @return string Full filesystem path to the root of the WordPress installation
    */
-  static public function site_path() {
-    $home = set_url_scheme(get_option('home') , 'http');
-    $siteurl = set_url_scheme(get_option('siteurl') , 'http');
+  static public function site_path()
+  {
+    $home = set_url_scheme(get_option('home'), 'http');
+    $siteurl = set_url_scheme(get_option('siteurl'), 'http');
 
     $home_path = ABSPATH;
     if (!empty($home) && 0 !== strcasecmp($home, $siteurl)) {
       $wp_path_rel_to_home = str_ireplace($home, '', $siteurl); /* $siteurl - $home */
-      $pos = strripos(str_replace('\\', '/', $_SERVER['SCRIPT_FILENAME']) , trailingslashit($wp_path_rel_to_home));
+      $pos = strripos(str_replace('\\', '/', $_SERVER['SCRIPT_FILENAME']), trailingslashit($wp_path_rel_to_home));
       // fix of get_home_path, used when index.php is moved outside of
       // wp folder.
       if ($pos !== false) {
@@ -465,10 +507,12 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function document_root() {
+  static public function document_root()
+  {
     static $document_root = null;
 
-    if (!is_null($document_root)) return $document_root;
+    if (!is_null($document_root))
+      return $document_root;
 
     if (!empty($_SERVER['SCRIPT_FILENAME']) && !empty($_SERVER['PHP_SELF'])) {
       $script_filename = MightyImageHelper::normalize_path($_SERVER['SCRIPT_FILENAME']);
@@ -481,12 +525,10 @@ class MightyImageHelper {
     }
 
     if (!empty($_SERVER['PATH_TRANSLATED'])) {
-      $document_root = substr(MightyImageHelper::normalize_path($_SERVER['PATH_TRANSLATED']) , 0, -strlen(MightyImageHelper::normalize_path($_SERVER['PHP_SELF'])));
-    }
-    elseif (!empty($_SERVER['DOCUMENT_ROOT'])) {
+      $document_root = substr(MightyImageHelper::normalize_path($_SERVER['PATH_TRANSLATED']), 0, -strlen(MightyImageHelper::normalize_path($_SERVER['PHP_SELF'])));
+    } elseif (!empty($_SERVER['DOCUMENT_ROOT'])) {
       $document_root = MightyImageHelper::normalize_path($_SERVER['DOCUMENT_ROOT']);
-    }
-    else {
+    } else {
       $document_root = ABSPATH;
     }
 
@@ -507,7 +549,8 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function site_root() {
+  static public function site_root()
+  {
     $site_root = ABSPATH;
     $site_root = realpath($site_root);
     $site_root = MightyImageHelper::normalize_path($site_root);
@@ -522,7 +565,8 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function site_url_uri() {
+  static public function site_url_uri()
+  {
     return MightyImageHelper::url_to_uri(site_url()) . '/';
   }
 
@@ -531,7 +575,8 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function home_url_host() {
+  static public function home_url_host()
+  {
     $home_url = get_home_url();
     $parse_url = @parse_url($home_url);
 
@@ -554,19 +599,23 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function home_url_uri() {
+  static public function home_url_uri()
+  {
     return MightyImageHelper::url_to_uri(get_home_url()) . '/';
   }
 
-  static public function network_home_url_uri() {
+  static public function network_home_url_uri()
+  {
     $uri = network_home_url('', 'relative');
 
     /* There is a bug in WP where network_home_url can return
      * a non-relative URI even though scheme is set to relative.
-    */
-    if (MightyImageHelper::is_url($uri)) $uri = parse_url($uri, PHP_URL_PATH);
+     */
+    if (MightyImageHelper::is_url($uri))
+      $uri = parse_url($uri, PHP_URL_PATH);
 
-    if (empty($uri)) return '/';
+    if (empty($uri))
+      return '/';
 
     return $uri;
   }
@@ -576,15 +625,15 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function host_port() {
+  static public function host_port()
+  {
     static $host = null;
 
     if ($host === null) {
       if (!empty($_SERVER['HTTP_HOST'])) {
         // HTTP_HOST sometimes is not set causing warning
         $host = $_SERVER['HTTP_HOST'];
-      }
-      else {
+      } else {
         $host = '';
       }
     }
@@ -592,11 +641,13 @@ class MightyImageHelper {
     return esc_html($host);
   }
 
-  static public function host() {
+  static public function host()
+  {
     $host_port = MightyImageHelper::host_port();
 
     $pos = strpos($host_port, ':');
-    if ($pos === false) return $host_port;
+    if ($pos === false)
+      return $host_port;
 
     return substr($host_port, 0, $pos);
   }
@@ -607,18 +658,20 @@ class MightyImageHelper {
    * @param string  $path
    * @return mixed
    */
-  static public function parse_path($path) {
-    $path = str_replace(array(
-      '%BLOG_ID%',
-      '%POST_ID%',
-      '%BLOG_ID%',
-      '%HOST%'
-    ) , array(
-      (isset($GLOBALS['blog_id']) ? (int)$GLOBALS['blog_id'] : 0) ,
-      (isset($GLOBALS['post_id']) ? (int)$GLOBALS['post_id'] : 0) ,
-      MightyImageHelper::blog_id() ,
-      MightyImageHelper::host()
-    ) , $path);
+  static public function parse_path($path)
+  {
+    $path = str_replace(
+      array(
+        '%BLOG_ID%',
+        '%POST_ID%',
+        '%BLOG_ID%',
+        '%HOST%'
+      ), array(
+        (isset($GLOBALS['blog_id']) ? (int) $GLOBALS['blog_id'] : 0),
+        (isset($GLOBALS['post_id']) ? (int) $GLOBALS['post_id'] : 0),
+        MightyImageHelper::blog_id(),
+        MightyImageHelper::host()
+      ), $path);
 
     return $path;
   }
@@ -631,7 +684,8 @@ class MightyImageHelper {
    * @param string  $file
    * @return string
    */
-  static public function normalize_file($file) {
+  static public function normalize_file($file)
+  {
     if (MightyImageHelper::is_url($file)) {
       if (strstr($file, '?') === false) {
         $home_url_regexp = '~' . MightyImageHelper::home_url_regexp() . '~i';
@@ -641,7 +695,7 @@ class MightyImageHelper {
 
     if (!MightyImageHelper::is_url($file)) {
       $file = MightyImageHelper::normalize_path($file);
-      $file = str_replace(MightyImageHelper::site_root() , '', $file);
+      $file = str_replace(MightyImageHelper::site_root(), '', $file);
       $file = ltrim($file, '/');
     }
 
@@ -656,7 +710,8 @@ class MightyImageHelper {
    * @param string  $file
    * @return string
    */
-  static public function normalize_file_minify($file) {
+  static public function normalize_file_minify($file)
+  {
     if (MightyImageHelper::is_url($file)) {
       if (strstr($file, '?') === false) {
         $domain_url_regexp = '~' . MightyImageHelper::home_domain_root_url_regexp() . '~i';
@@ -666,7 +721,7 @@ class MightyImageHelper {
 
     if (!MightyImageHelper::is_url($file)) {
       $file = MightyImageHelper::normalize_path($file);
-      $file = str_replace(MightyImageHelper::document_root() , '', $file);
+      $file = str_replace(MightyImageHelper::document_root(), '', $file);
       $file = ltrim($file, '/');
     }
 
@@ -680,9 +735,10 @@ class MightyImageHelper {
    * @param string  $file
    * @return string
    */
-  static public function url_to_docroot_filename($url) {
+  static public function url_to_docroot_filename($url)
+  {
     $data = array(
-      'home_url' => get_home_url() ,
+      'home_url' => get_home_url(),
       'url' => $url
     );
     $data = apply_filters('w3tc_url_to_docroot_filename', $data);
@@ -699,18 +755,17 @@ class MightyImageHelper {
       // not a home url, return unchanged since cant be
       // converted to filename
       return $url;
-    }
-    else {
+    } else {
       $path_relative_to_home = str_replace($home_url, '', $normalized_url);
 
-      $home = set_url_scheme(get_option('home') , 'http');
-      $siteurl = set_url_scheme(get_option('siteurl') , 'http');
+      $home = set_url_scheme(get_option('home'), 'http');
+      $siteurl = set_url_scheme(get_option('siteurl'), 'http');
 
-      $home_path = rtrim(MightyImageHelper::site_path() , '/');
+      $home_path = rtrim(MightyImageHelper::site_path(), '/');
       // adjust home_path if site is not is home
       if (!empty($home) && 0 !== strcasecmp($home, $siteurl)) {
         // $siteurl - $home
-        $wp_path_rel_to_home = rtrim(str_ireplace($home, '', $siteurl) , '/');
+        $wp_path_rel_to_home = rtrim(str_ireplace($home, '', $siteurl), '/');
         if (substr($home_path, -strlen($wp_path_rel_to_home)) == $wp_path_rel_to_home) {
           $home_path = substr($home_path, 0, -strlen($wp_path_rel_to_home));
         }
@@ -722,8 +777,10 @@ class MightyImageHelper {
       $full_filename = $home_path . DIRECTORY_SEPARATOR . trim($path_relative_to_home, DIRECTORY_SEPARATOR);
 
       $docroot = MightyImageHelper::document_root();
-      if (substr($full_filename, 0, strlen($docroot)) == $docroot) $docroot_filename = substr($full_filename, strlen($docroot));
-      else $docroot_filename = $path_relative_to_home;
+      if (substr($full_filename, 0, strlen($docroot)) == $docroot)
+        $docroot_filename = substr($full_filename, strlen($docroot));
+      else
+        $docroot_filename = $path_relative_to_home;
     }
 
     // sometimes urls (coming from other plugins/themes)
@@ -740,14 +797,16 @@ class MightyImageHelper {
    * @param string  $file
    * @return string
    */
-  static public function translate_file($file) {
+  static public function translate_file($file)
+  {
     return $file;
   }
 
   /**
    * Removes WP query string from URL
    */
-  static public function remove_query($url) {
+  static public function remove_query($url)
+  {
     $url = preg_replace('~[&\?]+(ver=([a-z0-9-_\.]+|[0-9-]+))~i', '', $url);
 
     return $url;
@@ -756,9 +815,11 @@ class MightyImageHelper {
   /**
    * Removes all query strings from url
    */
-  static public function remove_query_all($url) {
+  static public function remove_query_all($url)
+  {
     $pos = strpos($url, '?');
-    if ($pos === false) return $url;
+    if ($pos === false)
+      return $url;
 
     return substr($url, 0, $pos);
   }
@@ -769,7 +830,8 @@ class MightyImageHelper {
    * @param string  $path
    * @return string
    */
-  static public function normalize_path($path) {
+  static public function normalize_path($path)
+  {
     $path = preg_replace('~[/\\\]+~', '/', $path);
     $path = rtrim($path, '/');
 
@@ -782,7 +844,8 @@ class MightyImageHelper {
    * @param string  $path
    * @return string
    */
-  static public function realpath($path) {
+  static public function realpath($path)
+  {
     $path = MightyImageHelper::normalize_path($path);
     $parts = explode('/', $path);
     $absolutes = array();
@@ -793,8 +856,7 @@ class MightyImageHelper {
       }
       if ('..' == $part) {
         array_pop($absolutes);
-      }
-      else {
+      } else {
         $absolutes[] = $part;
       }
     }
@@ -808,7 +870,8 @@ class MightyImageHelper {
    * @param string  $path
    * @return string
    */
-  static public function path_remove_dots($path) {
+  static public function path_remove_dots($path)
+  {
     $parts = explode('/', $path);
     $absolutes = array();
 
@@ -818,8 +881,7 @@ class MightyImageHelper {
       }
       if ('..' == $part) {
         array_pop($absolutes);
-      }
-      else {
+      } else {
         $absolutes[] = $part;
       }
     }
@@ -830,7 +892,8 @@ class MightyImageHelper {
   /**
    * Returns full URL from relative one
    */
-  static public function url_relative_to_full($relative_url) {
+  static public function url_relative_to_full($relative_url)
+  {
     $relative_url = MightyImageHelper::path_remove_dots($relative_url);
 
     if (version_compare(PHP_VERSION, '5.4.7') < 0) {
@@ -841,9 +904,11 @@ class MightyImageHelper {
 
     $rel = parse_url($relative_url);
     // it's full url already
-    if (isset($rel['scheme']) || isset($rel['host'])) return $relative_url;
+    if (isset($rel['scheme']) || isset($rel['host']))
+      return $relative_url;
 
-    if (!isset($rel['host'])) $rel['host'] = parse_url(get_home_url() , PHP_URL_HOST);
+    if (!isset($rel['host']))
+      $rel['host'] = parse_url(get_home_url(), PHP_URL_HOST);
 
     $scheme = isset($rel['scheme']) ? $rel['scheme'] . '://' : '//';
     $host = isset($rel['host']) ? $rel['host'] : '';
@@ -860,9 +925,11 @@ class MightyImageHelper {
    * @param array   $params
    * @return string
    */
-  static public function redirect($url = '', $params = array()) {
+  static public function redirect($url = '', $params = array())
+  {
     $url = MightyImageHelper::url_format($url, $params);
-    if (function_exists('do_action')) do_action('w3tc_redirect');
+    if (function_exists('do_action'))
+      do_action('w3tc_redirect');
 
     @header('Location: ' . $url);
     exit();
@@ -876,9 +943,11 @@ class MightyImageHelper {
    *
    * @return string
    */
-  static public function redirect_temp($url = '', $params = array()) {
+  static public function redirect_temp($url = '', $params = array())
+  {
     $url = MightyImageHelper::url_format($url, $params);
-    if (function_exists('do_action')) do_action('w3tc_redirect');
+    if (function_exists('do_action'))
+      do_action('w3tc_redirect');
 
     $status_code = 301;
 
@@ -902,29 +971,27 @@ class MightyImageHelper {
    *
    * @return integer
    */
-  static public function detect_post_id() {
+  static public function detect_post_id()
+  {
     global $posts, $comment_post_ID, $post_ID;
 
     if ($post_ID) {
       return $post_ID;
-    }
-    elseif ($comment_post_ID) {
+    } elseif ($comment_post_ID) {
       return $comment_post_ID;
-    }
-    elseif ((is_single() || is_page()) && is_array($posts)) {
+    } elseif ((is_single() || is_page()) && is_array($posts)) {
       return $posts[0]->ID;
-    }
-    elseif (is_object($posts) && property_exists($posts, 'ID')) {
+    } elseif (is_object($posts) && property_exists($posts, 'ID')) {
       return $posts->ID;
-    }
-    elseif (isset($_REQUEST['p'])) {
-      return (integer)$_REQUEST['p'];
+    } elseif (isset($_REQUEST['p'])) {
+      return (integer) $_REQUEST['p'];
     }
 
     return 0;
   }
 
-  static public function instance_id() {
+  static public function instance_id()
+  {
     static $instance_id;
 
     if (!isset($instance_id)) {
@@ -940,10 +1007,14 @@ class MightyImageHelper {
    * @var Config $config
    * @return string
    */
-  static public function w3tc_edition($config = null) {
-    if (MightyImageHelper::is_w3tc_enterprise($config)) return 'enterprise';
-    if (MightyImageHelper::is_w3tc_pro($config) && MightyImageHelper::is_w3tc_pro_dev()) return 'pro development';
-    if (MightyImageHelper::is_w3tc_pro($config)) return 'pro';
+  static public function w3tc_edition($config = null)
+  {
+    if (MightyImageHelper::is_w3tc_enterprise($config))
+      return 'enterprise';
+    if (MightyImageHelper::is_w3tc_pro($config) && MightyImageHelper::is_w3tc_pro_dev())
+      return 'pro development';
+    if (MightyImageHelper::is_w3tc_pro($config))
+      return 'pro';
     return 'community';
   }
 
@@ -953,16 +1024,20 @@ class MightyImageHelper {
    * @param Config  $config
    * @return bool
    */
-  static public function is_w3tc_pro($config = null) {
-    if (defined('W3TC_PRO') && W3TC_PRO) return true;
+  static public function is_w3tc_pro($config = null)
+  {
+    if (defined('W3TC_PRO') && W3TC_PRO)
+      return true;
 
     if (is_object($config)) {
       $plugin_type = $config->get_string('plugin.type');
 
-      if ($plugin_type == 'pro' || $plugin_type == 'pro_dev') return true;
+      if ($plugin_type == 'pro' || $plugin_type == 'pro_dev')
+        return true;
     }
 
-    if (MightyImageHelper::is_w3tc_enterprise($config)) return true;
+    if (MightyImageHelper::is_w3tc_enterprise($config))
+      return true;
 
     return false;
   }
@@ -972,7 +1047,8 @@ class MightyImageHelper {
    *
    * @return bool
    */
-  static public function is_w3tc_pro_dev() {
+  static public function is_w3tc_pro_dev()
+  {
     return defined('W3TC_PRO_DEV_MODE') && W3TC_PRO_DEV_MODE;
   }
 
@@ -982,10 +1058,13 @@ class MightyImageHelper {
    * @param Config  $config
    * @return bool
    */
-  static public function is_w3tc_enterprise($config = null) {
-    if (defined('W3TC_ENTERPRISE') && W3TC_ENTERPRISE) return true;
+  static public function is_w3tc_enterprise($config = null)
+  {
+    if (defined('W3TC_ENTERPRISE') && W3TC_ENTERPRISE)
+      return true;
 
-    if (is_object($config) && $config->get_string('plugin.type') == 'enterprise') return true;
+    if (is_object($config) && $config->get_string('plugin.type') == 'enterprise')
+      return true;
 
     return false;
   }
@@ -995,7 +1074,8 @@ class MightyImageHelper {
    *
    * @return bool
    */
-  static public function is_w3tc_edge($config) {
+  static public function is_w3tc_edge($config)
+  {
     return $config->get_boolean('common.edge');
   }
 
@@ -1006,11 +1086,13 @@ class MightyImageHelper {
    * @param string  $delimiter
    * @return string
    */
-  static public function preg_quote($string, $delimiter = '~') {
+  static public function preg_quote($string, $delimiter = '~')
+  {
     $string = preg_quote($string, $delimiter);
     $string = strtr($string, array(
       ' ' => '\ '
-    ));
+    )
+    );
 
     return $string;
   }
@@ -1020,7 +1102,8 @@ class MightyImageHelper {
    *
    * @return boolean
    */
-  static public function is_zlib_enabled() {
+  static public function is_zlib_enabled()
+  {
     return MightyImageHelper::to_boolean(ini_get('zlib.output_compression'));
   }
 
@@ -1030,15 +1113,16 @@ class MightyImageHelper {
    * @param mixed   $var
    * @return mixed
    */
-  static public function stripslashes($var) {
+  static public function stripslashes($var)
+  {
     if (is_string($var)) {
       return stripslashes($var);
-    }
-    elseif (is_array($var)) {
-      $var = array_map(array(
-        '\W3TC\MightyImageHelper',
-        'stripslashes'
-      ) , $var);
+    } elseif (is_array($var)) {
+      $var = array_map(
+        array(
+          '\W3TC\MightyImageHelper',
+          'stripslashes'
+        ), $var);
     }
 
     return $var;
@@ -1052,8 +1136,10 @@ class MightyImageHelper {
    * @param Config  $config
    * @return bool
    */
-  static public function is_flushable_post($post, $module, $config) {
-    if (is_numeric($post)) $post = get_post($post);
+  static public function is_flushable_post($post, $module, $config)
+  {
+    if (is_numeric($post))
+      $post = get_post($post);
     $post_status = array(
       'publish'
     );
@@ -1067,463 +1153,497 @@ class MightyImageHelper {
       case 'pgcache':
       case 'varnish':
       case 'posts': // means html content of post pages
-        if (!$config->get_boolean('pgcache.reject.logged')) $post_status[] = 'private';
+        if (!$config->get_boolean('pgcache.reject.logged'))
+          $post_status[] = 'private';
         break;
       case 'dbcache':
-        if (!$config->get_boolean('dbcache.reject.logged')) $post_status[] = 'private';
+        if (!$config->get_boolean('dbcache.reject.logged'))
+          $post_status[] = 'private';
         break;
-      }
-
-      $flushable = is_object($post) && !in_array($post->post_type, $post_type) && in_array($post->post_status, $post_status);
-
-      return apply_filters('w3tc_flushable_post', $flushable, $post, $module);
     }
 
-    /**
-     * Converts value to boolean
-     *
-     * @param mixed   $value
-     * @return boolean
-     */
-    static public function to_boolean($value) {
-      if (is_string($value)) {
-        switch (strtolower($value)) {
-          case '+':
-          case '1':
-          case 'y':
-          case 'on':
-          case 'yes':
-          case 'true':
-          case 'enabled':
-            return true;
+    $flushable = is_object($post) && !in_array($post->post_type, $post_type) && in_array($post->post_status, $post_status);
 
-          case '-':
-          case '0':
-          case 'n':
-          case 'no':
-          case 'off':
-          case 'false':
-          case 'disabled':
-            return false;
-        }
+    return apply_filters('w3tc_flushable_post', $flushable, $post, $module);
+  }
+
+  /**
+   * Converts value to boolean
+   *
+   * @param mixed   $value
+   * @return boolean
+   */
+  static public function to_boolean($value)
+  {
+    if (is_string($value)) {
+      switch (strtolower($value)) {
+        case '+':
+        case '1':
+        case 'y':
+        case 'on':
+        case 'yes':
+        case 'true':
+        case 'enabled':
+          return true;
+
+        case '-':
+        case '0':
+        case 'n':
+        case 'no':
+        case 'off':
+        case 'false':
+        case 'disabled':
+          return false;
       }
-
-      return (boolean)$value;
     }
 
-    /**
-     * Filter handler for use_curl_transport.
-     * Workaround to not use curl for extra http methods
-     *
-     * @param unknown $result boolean
-     * @param unknown $args   array
-     * @return boolean
-     */
-    static public function use_curl_transport($result, $args) {
-      if (isset($args['method']) && $args['method'] != 'GET' && $args['method'] != 'POST') return false;
+    return (boolean) $value;
+  }
 
-      return $result;
-    }
-
-    /**
-     * Sends HTTP request
-     *
-     * @param unknown $url  string
-     * @param unknown $args array
-     * @return WP_Error|array
-     */
-    static public function request($url, $args = array()) {
-      static $filter_set = false;
-      if (!$filter_set) {
-        add_filter('use_curl_transport', array(
-          '\W3TC\Util_Http',
-          'use_curl_transport'
-        ) , 10, 2);
-        $filter_set = true;
-      }
-
-      $args = array_merge(array(
-        'user-agent' => W3TC_POWERED_BY
-      ) , $args);
-
-      return wp_remote_request($url, $args);
-    }
-
-    /**
-     * Sends HTTP GET request
-     *
-     * @param string  $url
-     * @param array   $args
-     * @return array|WP_Error
-     */
-    static public function get($url, $args = array()) {
-      $args = array_merge($args, array(
-        'method' => 'GET'
-      ));
-
-      return self::request($url, $args);
-    }
-
-    /**
-     * Downloads URL into a file
-     *
-     * @param string  $url
-     * @param string  $file
-     * @return boolean
-     */
-    static public function download($url, $file) {
-      if (strpos($url, '//') === 0) {
-        $url = (MightyImageHelper::is_https() ? 'https:' : 'http:') . $url;
-      }
-
-      $response = self::get($url);
-
-      if (!is_wp_error($response) && $response['response']['code'] == 200) {
-        return @file_put_contents($file, $response['body']);
-      }
-
+  /**
+   * Filter handler for use_curl_transport.
+   * Workaround to not use curl for extra http methods
+   *
+   * @param unknown $result boolean
+   * @param unknown $args   array
+   * @return boolean
+   */
+  static public function use_curl_transport($result, $args)
+  {
+    if (isset($args['method']) && $args['method'] != 'GET' && $args['method'] != 'POST')
       return false;
+
+    return $result;
+  }
+
+  /**
+   * Sends HTTP request
+   *
+   * @param unknown $url  string
+   * @param unknown $args array
+   * @return WP_Error|array
+   */
+  static public function request($url, $args = array())
+  {
+    static $filter_set = false;
+    if (!$filter_set) {
+      add_filter('use_curl_transport', array(
+        '\W3TC\Util_Http',
+        'use_curl_transport'
+      ), 10, 2);
+      $filter_set = true;
     }
 
-    /**
-     * Returns upload info
-     *
-     * @return array
-     */
-    static public function upload_info() {
-      static $upload_info = null;
+    $args = array_merge(
+      array(
+        'user-agent' => W3TC_POWERED_BY
+      ), $args);
 
-      if ($upload_info === null) {
-        $upload_info = MightyImageHelper::wp_upload_dir();
+    return wp_remote_request($url, $args);
+  }
 
-        if (empty($upload_info['error'])) {
-          $parse_url = @parse_url($upload_info['baseurl']);
+  /**
+   * Sends HTTP GET request
+   *
+   * @param string  $url
+   * @param array   $args
+   * @return array|WP_Error
+   */
+  static public function get($url, $args = array())
+  {
+    $args = array_merge($args, array(
+      'method' => 'GET'
+    )
+    );
 
-          if ($parse_url) {
-            $baseurlpath = (!empty($parse_url['path']) ? trim($parse_url['path'], '/') : '');
-          }
-          else {
-            $baseurlpath = 'wp-content/uploads';
-          }
+    return self::request($url, $args);
+  }
 
-          $upload_info['baseurlpath'] = '/' . $baseurlpath . '/';
+  /**
+   * Downloads URL into a file
+   *
+   * @param string  $url
+   * @param string  $file
+   * @return boolean
+   */
+  static public function download($url, $file)
+  {
+    if (strpos($url, '//') === 0) {
+      $url = (MightyImageHelper::is_https() ? 'https:' : 'http:') . $url;
+    }
+
+    $response = self::get($url);
+
+    if (!is_wp_error($response) && $response['response']['code'] == 200) {
+      return @file_put_contents($file, $response['body']);
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns upload info
+   *
+   * @return array
+   */
+  static public function upload_info()
+  {
+    static $upload_info = null;
+
+    if ($upload_info === null) {
+      $upload_info = MightyImageHelper::wp_upload_dir();
+
+      if (empty($upload_info['error'])) {
+        $parse_url = @parse_url($upload_info['baseurl']);
+
+        if ($parse_url) {
+          $baseurlpath = (!empty($parse_url['path']) ? trim($parse_url['path'], '/') : '');
+        } else {
+          $baseurlpath = 'wp-content/uploads';
         }
-        else {
-          $upload_info = false;
+
+        $upload_info['baseurlpath'] = '/' . $baseurlpath . '/';
+      } else {
+        $upload_info = false;
+      }
+    }
+
+    return $upload_info;
+  }
+
+  /**
+   * Check whether $engine is correct CDN engine
+   *
+   * @param string  $engine
+   * @return boolean
+   */
+  static public function is_engine($engine)
+  {
+    return in_array($engine, array(
+      'akamai',
+      'att',
+      'azure',
+      'cf',
+      'cloudfront_fsd',
+      'cf2',
+      'cotendo',
+      'edgecast',
+      'maxcdn_fsd',
+      'ftp',
+      'google_drive',
+      'highwinds',
+      'maxcdn',
+      'mirror',
+      'netdna',
+      'rscf',
+      'rackspace_cdn',
+      's3',
+      's3_compatible',
+    )
+    );
+  }
+
+  /**
+   * Returns true if CDN engine is mirror
+   *
+   * @param string  $engine
+   * @return bool
+   */
+  static public function is_engine_mirror($engine)
+  {
+    return in_array($engine, array(
+      'mirror',
+      'netdna',
+      'maxcdn',
+      'cotendo',
+      'cf2',
+      'akamai',
+      'edgecast',
+      'att',
+      'highwinds',
+      'rackspace_cdn'
+    )
+    );
+  }
+
+  /**
+   * Returns true if CDN engine is mirror
+   *
+   * @param string  $engine
+   * @return bool
+   */
+  static public function is_engine_fsd($engine)
+  {
+    return in_array($engine, array(
+      'cloudfront_fsd',
+      'maxcdn_fsd'
+    )
+    );
+  }
+
+  static public function is_engine_push($engine)
+  {
+    return !self::is_engine_mirror($engine) && !self::is_engine_fsd($engine);
+  }
+
+  /**
+   * Returns true if CDN has purge all support
+   *
+   * @param string $engine
+   * @return bool
+   */
+  static public function can_purge_all($engine)
+  {
+    return in_array($engine, array(
+      'att',
+      'cotendo',
+      'edgecast',
+      'maxcdn_fsd',
+      'highwinds',
+      'maxcdn',
+      'netdna',
+    )
+    );
+  }
+
+  /**
+   * Returns true if CDN engine is supporting purge
+   *
+   * @param string  $engine
+   * @return bool
+   */
+  static public function can_purge($engine)
+  {
+    return in_array($engine, array(
+      'akamai',
+      'att',
+      'azure',
+      'cf',
+      'cf2',
+      'cloudfront_fsd',
+      'cotendo',
+      'edgecast',
+      'maxcdn_fsd',
+      'ftp',
+      'highwinds',
+      'maxcdn',
+      'netdna',
+      'rscf',
+      's3',
+      's3_compatible',
+    )
+    );
+  }
+
+  /**
+   * Returns true if CDN supports realtime purge. That is purging on post changes, comments etc.
+   *
+   * @param string $engine
+   * @return bool
+   */
+  static public function supports_realtime_purge($engine)
+  {
+    return !in_array($engine, array(
+      'cf2'
+    )
+    );
+  }
+
+  /**
+   * Search files
+   *
+   * @param string  $search_dir
+   * @param string  $base_dir
+   * @param string  $mask
+   * @param boolean $recursive
+   * @return array
+   */
+  static function search_files($search_dir, $base_dir, $mask = '*.*', $recursive = true)
+  {
+    static $stack = array();
+    $files = array();
+    $ignore = array(
+      '.svn',
+      '.git',
+      '.DS_Store',
+      'CVS',
+      'Thumbs.db',
+      'desktop.ini'
+    );
+
+    $dir = @opendir($search_dir);
+
+    if ($dir) {
+      while (($entry = @readdir($dir)) !== false) {
+        if ($entry != '.' && $entry != '..' && !in_array($entry, $ignore)) {
+          $path = $search_dir . '/' . $entry;
+
+          if (@is_dir($path) && $recursive) {
+            array_push($stack, $entry);
+            $files = array_merge($files, self::search_files($path, $base_dir, $mask, $recursive));
+            array_pop($stack);
+          } else {
+            $regexp = '~^(' . self::get_regexp_by_mask($mask) . ')$~i';
+
+            if (preg_match($regexp, $entry)) {
+              $tmp = $base_dir != '' ? $base_dir . '/' : '';
+              $tmp .= ($p = implode('/', $stack)) != '' ? $p . '/' : '';
+              $files[] = $tmp . $entry;
+            }
+          }
         }
       }
 
-      return $upload_info;
+      @closedir($dir);
     }
 
-    /**
-     * Check whether $engine is correct CDN engine
-     *
-     * @param string  $engine
-     * @return boolean
-     */
-    static public function is_engine($engine) {
-      return in_array($engine, array(
-        'akamai',
-        'att',
-        'azure',
-        'cf',
-        'cloudfront_fsd',
-        'cf2',
-        'cotendo',
-        'edgecast',
-        'maxcdn_fsd',
-        'ftp',
-        'google_drive',
-        'highwinds',
-        'maxcdn',
-        'mirror',
-        'netdna',
-        'rscf',
-        'rackspace_cdn',
-        's3',
-        's3_compatible',
-      ));
-    }
+    return $files;
+  }
 
-    /**
-     * Returns true if CDN engine is mirror
-     *
-     * @param string  $engine
-     * @return bool
-     */
-    static public function is_engine_mirror($engine) {
-      return in_array($engine, array(
-        'mirror',
-        'netdna',
-        'maxcdn',
-        'cotendo',
-        'cf2',
-        'akamai',
-        'edgecast',
-        'att',
-        'highwinds',
-        'rackspace_cdn'
-      ));
-    }
+  /**
+   * Returns regexp by mask
+   *
+   * @param string  $mask
+   * @return string
+   */
+  static function get_regexp_by_mask($mask)
+  {
+    $mask = trim($mask);
+    $mask = MightyImageHelper::preg_quote($mask);
 
-    /**
-     * Returns true if CDN engine is mirror
-     *
-     * @param string  $engine
-     * @return bool
-     */
-    static public function is_engine_fsd($engine) {
-      return in_array($engine, array(
-        'cloudfront_fsd',
-        'maxcdn_fsd'
-      ));
-    }
-
-    static public function is_engine_push($engine) {
-      return !self::is_engine_mirror($engine) && !self::is_engine_fsd($engine);
-    }
-
-    /**
-     * Returns true if CDN has purge all support
-     *
-     * @param unknown $engine
-     * @return bool
-     */
-    static public function can_purge_all($engine) {
-      return in_array($engine, array(
-        'att',
-        'cotendo',
-        'edgecast',
-        'maxcdn_fsd',
-        'highwinds',
-        'maxcdn',
-        'netdna',
-      ));
-    }
-
-    /**
-     * Returns true if CDN engine is supporting purge
-     *
-     * @param string  $engine
-     * @return bool
-     */
-    static public function can_purge($engine) {
-      return in_array($engine, array(
-        'akamai',
-        'att',
-        'azure',
-        'cf',
-        'cf2',
-        'cloudfront_fsd',
-        'cotendo',
-        'edgecast',
-        'maxcdn_fsd',
-        'ftp',
-        'highwinds',
-        'maxcdn',
-        'netdna',
-        'rscf',
-        's3',
-        's3_compatible',
-      ));
-    }
-
-    /**
-     * Returns true if CDN supports realtime purge. That is purging on post changes, comments etc.
-     *
-     * @param unknown $engine
-     * @return bool
-     */
-    static public function supports_realtime_purge($engine) {
-      return !in_array($engine, array(
-        'cf2'
-      ));
-    }
-
-    /**
-     * Search files
-     *
-     * @param string  $search_dir
-     * @param string  $base_dir
-     * @param string  $mask
-     * @param boolean $recursive
-     * @return array
-     */
-    static function search_files($search_dir, $base_dir, $mask = '*.*', $recursive = true) {
-      static $stack = array();
-      $files = array();
-      $ignore = array(
-        '.svn',
-        '.git',
-        '.DS_Store',
-        'CVS',
-        'Thumbs.db',
-        'desktop.ini'
-      );
-
-      $dir = @opendir($search_dir);
-
-      if ($dir) {
-        while (($entry = @readdir($dir)) !== false) {
-          if ($entry != '.' && $entry != '..' && !in_array($entry, $ignore)) {
-            $path = $search_dir . '/' . $entry;
-
-            if (@is_dir($path) && $recursive) {
-              array_push($stack, $entry);
-              $files = array_merge($files, self::search_files($path, $base_dir, $mask, $recursive));
-              array_pop($stack);
-            }
-            else {
-              $regexp = '~^(' . self::get_regexp_by_mask($mask) . ')$~i';
-
-              if (preg_match($regexp, $entry)) {
-                $tmp = $base_dir != '' ? $base_dir . '/' : '';
-                $tmp .= ($p = implode('/', $stack)) != '' ? $p . '/' : '';
-                $files[] = $tmp . $entry;
-              }
-            }
-          }
-        }
-
-        @closedir($dir);
-      }
-
-      return $files;
-    }
-
-    /**
-     * Returns regexp by mask
-     *
-     * @param string  $mask
-     * @return string
-     */
-    static function get_regexp_by_mask($mask) {
-      $mask = trim($mask);
-      $mask = MightyImageHelper::preg_quote($mask);
-
-      $mask = str_replace(array(
+    $mask = str_replace(
+      array(
         '\*',
         '\?',
         ';'
-      ) , array(
+      ), array(
         '@ASTERISK@',
         '@QUESTION@',
         '|'
-      ) , $mask);
+      ), $mask);
 
-      $regexp = str_replace(array(
+    $regexp = str_replace(
+      array(
         '@ASTERISK@',
         '@QUESTION@'
-      ) , array(
+      ), array(
         '[^\\?\\*:\\|\'"<>]*',
         '[^\\?\\*:\\|\'"<>]'
-      ) , $mask);
+      ), $mask);
 
-      return $regexp;
-    }
+    return $regexp;
+  }
 
-    static function replace_folder_placeholders($file) {
-      static $content_dir, $plugin_dir, $upload_dir;
-      if (empty($content_dir)) {
-        $content_dir = str_replace(MightyImageHelper::document_root() , '', WP_CONTENT_DIR);
-        $content_dir = substr($content_dir, strlen(MightyImageHelper::site_url_uri()));
-        $content_dir = trim($content_dir, '/');
-        if (defined('WP_PLUGIN_DIR')) {
-          $plugin_dir = str_replace(MightyImageHelper::document_root() , '', WP_PLUGIN_DIR);
-          $plugin_dir = trim($plugin_dir, '/');
-        }
-        else {
-          $plugin_dir = str_replace(MightyImageHelper::document_root() , '', WP_CONTENT_DIR . '/plugins');
-          $plugin_dir = trim($plugin_dir, '/');
-        }
-        $upload_dir = MightyImageHelper::wp_upload_dir();
-        $upload_dir = str_replace(MightyImageHelper::document_root() , '', $upload_dir['basedir']);
-        $upload_dir = trim($upload_dir, '/');
+  static function replace_folder_placeholders($file)
+  {
+    static $content_dir, $plugin_dir, $upload_dir;
+    if (empty($content_dir)) {
+      $content_dir = str_replace(MightyImageHelper::document_root(), '', WP_CONTENT_DIR);
+      $content_dir = substr($content_dir, strlen(MightyImageHelper::site_url_uri()));
+      $content_dir = trim($content_dir, '/');
+      if (defined('WP_PLUGIN_DIR')) {
+        $plugin_dir = str_replace(MightyImageHelper::document_root(), '', WP_PLUGIN_DIR);
+        $plugin_dir = trim($plugin_dir, '/');
+      } else {
+        $plugin_dir = str_replace(MightyImageHelper::document_root(), '', WP_CONTENT_DIR . '/plugins');
+        $plugin_dir = trim($plugin_dir, '/');
       }
-      $file = str_replace('{wp_content_dir}', $content_dir, $file);
-      $file = str_replace('{plugins_dir}', $plugin_dir, $file);
-      $file = str_replace('{uploads_dir}', $upload_dir, $file);
-
-      return $file;
+      $upload_dir = MightyImageHelper::wp_upload_dir();
+      $upload_dir = str_replace(MightyImageHelper::document_root(), '', $upload_dir['basedir']);
+      $upload_dir = trim($upload_dir, '/');
     }
+    $file = str_replace('{wp_content_dir}', $content_dir, $file);
+    $file = str_replace('{plugins_dir}', $plugin_dir, $file);
+    $file = str_replace('{uploads_dir}', $upload_dir, $file);
 
-    static function replace_folder_placeholders_to_uri($file) {
-      static $content_uri, $plugins_uri, $uploads_uri;
-      if (empty($content_uri)) {
-        $content_uri = MightyImageHelper::url_to_uri(content_url());
-        $plugins_uri = MightyImageHelper::url_to_uri(plugins_url());
+    return $file;
+  }
 
-        $upload_dir = MightyImageHelper::wp_upload_dir();
-        if (isset($upload_dir['baseurl'])) $uploads_uri = MightyImageHelper::url_to_uri($upload_dir['baseurl']);
-        else $uploads_uri = '';
+  static function replace_folder_placeholders_to_uri($file)
+  {
+    static $content_uri, $plugins_uri, $uploads_uri;
+    if (empty($content_uri)) {
+      $content_uri = MightyImageHelper::url_to_uri(content_url());
+      $plugins_uri = MightyImageHelper::url_to_uri(plugins_url());
+
+      $upload_dir = MightyImageHelper::wp_upload_dir();
+      if (isset($upload_dir['baseurl']))
+        $uploads_uri = MightyImageHelper::url_to_uri($upload_dir['baseurl']);
+      else
+        $uploads_uri = '';
+    }
+    $file = str_replace('{wp_content_dir}', $content_uri, $file);
+    $file = str_replace('{plugins_dir}', $plugins_uri, $file);
+    $file = str_replace('{uploads_dir}', $uploads_uri, $file);
+
+    return $file;
+  }
+
+  static function get_array($key, $default = array())
+  {
+    return (array) MightyImageHelper::get($key, $default);
+  }
+
+  static function log_debug($event, $content)
+  {
+    if (defined('MightyImage_Debug') && MightyImage_Debug == true) {
+
+      if (!array_key_exists($event, MightyImageHelper::$debug_logs)) {
+        MightyImageHelper::$debug_logs[$event] = array();
       }
-      $file = str_replace('{wp_content_dir}', $content_uri, $file);
-      $file = str_replace('{plugins_dir}', $plugins_uri, $file);
-      $file = str_replace('{uploads_dir}', $uploads_uri, $file);
 
-      return $file;
-    }
+      array_push(MightyImageHelper::$debug_logs[$event], $content);
 
-    static function get_array($key, $default = array()) {
-      return (array)MightyImageHelper::get($key, $default);
-    }
-
-    static function log_debug($event, $content) {
-      if (defined('MightyImage_Debug') && MightyImage_Debug == true) {
-
-        if (!array_key_exists($event, MightyImageHelper::$debug_logs)) {
-          MightyImageHelper::$debug_logs[$event] = array();
-        }
-
-        array_push(MightyImageHelper::$debug_logs[$event], $content);
-
-        MightyImageHelper::write_debug_logs();
-      }
-    }
-
-    static function write_debug_logs($mode = 'a', $file = 'mightyImage_debug' ) {
-        $upload_dir = MightyImageHelper::wp_upload_dir();
-        $upload_dir = $upload_dir['basedir'];
-        $entry = "";
-        try{
-          if ( is_array(MightyImageHelper::$debug_logs ) ) { 
-            $entry = json_encode(MightyImageHelper::$debug_logs); 
-          } 
-          $file  = $upload_dir . '/' . $file . '.log';
-          $file  = fopen( $file, $mode );
-          $bytes = fwrite( $file, current_time('mysql') . "::" . $entry . "\n" ); 
-          fclose( $file );
-        }catch(\Exception $ex){
-          error_log( $ex->getMessage(), 0 );
-        }
-    }
-
-    static function print_debug_logs($buffer) {
-      $buffer = $buffer . "<!--";
-      $buffer = $buffer . print_r(MightyImageHelper::$debug_logs, true);
-      $buffer = $buffer . "-->";
-      return $buffer;
-    }
-
-    static function ensureValidUrl($url) {
-
-      $parsed_url = parse_url($url);
-    
-      $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '//';
-      $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
-      $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
-      $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
-      $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
-      $pass = ($user || $pass) ? "$pass@" : '';
-      $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
-      $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
-      $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
-    
-      $result = "$scheme$user$pass$host$port$path$query$fragment";
-    
-      if ($result) return substr($result, -1) == "/" ? $result : $result . '/';
-    
-      return NULL;
+      MightyImageHelper::write_debug_logs();
     }
   }
+
+  static function write_debug_logs($mode = 'a', $file = 'mightyImage_debug')
+  {
+    $upload_dir = MightyImageHelper::wp_upload_dir();
+    $upload_dir = $upload_dir['basedir'];
+    $entry = "";
+    try {
+      if (is_array(MightyImageHelper::$debug_logs)) {
+        $entry = json_encode(MightyImageHelper::$debug_logs);
+      }
+      $file = $upload_dir . '/' . $file . '.log';
+      $file = fopen($file, $mode);
+      $bytes = fwrite($file, current_time('mysql') . "::" . $entry . "\n");
+      fclose($file);
+    } catch (\Exception $ex) {
+      error_log($ex->getMessage(), 0);
+    }
+  }
+
+  static function print_debug_logs($buffer)
+  {
+    $buffer = $buffer . "<!--";
+    $buffer = $buffer . print_r(MightyImageHelper::$debug_logs, true);
+    $buffer = $buffer . "-->";
+    return $buffer;
+  }
+
+  static function ensureValidUrl($url)
+  {
+
+    $parsed_url = parse_url($url);
+
+    $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '//';
+    $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+    $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+    $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
+    $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
+    $pass = ($user || $pass) ? "$pass@" : '';
+    $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+    $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+    $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
+
+    $result = "$scheme$user$pass$host$port$path$query$fragment";
+
+    if ($result)
+      return substr($result, -1) == "/" ? $result : $result . '/';
+
+    return NULL;
+  }
+}
